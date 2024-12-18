@@ -1,0 +1,23 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-rust-backend:$COMMIT_SHA', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/my-rust-backend:$COMMIT_SHA']
+  # Deploy to Cloud Run, GKE, etc.
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'gcloud'
+    args:
+      [
+        'run',
+        'deploy',
+        'note-me-backend',
+        '--image',
+        'gcr.io/$PROJECT_ID/my-rust-backend:$COMMIT_SHA',
+        '--region',
+        'us-central1',
+        '--platform',
+        'managed',
+        '--allow-unauthenticated', # Remove in production
+      ]
+images:
+- gcr.io/$PROJECT_ID/my-rust-backend:$COMMIT_SHA

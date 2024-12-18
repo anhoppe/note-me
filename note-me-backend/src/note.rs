@@ -5,6 +5,7 @@ use serde::{Serialize, Deserialize};
 pub struct Note {
     pub title: String,
     pub text: String,
-    pub date: String,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
 }    
 

@@ -9,12 +9,48 @@ import NoteForm from './NoteForm';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const apiUrl = "http://127.0.0.1:3000/notes";
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     const newNote = new Note();
     newNote.text = "foo";
     newNote.title = "bar";
-    setNotes([...notes, newNote]);
+
+    let success = await handleSaveNote(newNote);
+
+    if (success)
+    {    
+      setNotes([...notes, newNote]);
+    }  
+  };
+
+  const handleSaveNote = async (note: Note): Promise<boolean> => {
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'PUT', // Correct method is PUT as specified
+        headers: {
+          'Content-Type': 'application/json', // Very important!
+        },
+        body: JSON.stringify(note), // Convert the note object to JSON
+      });
+
+      if (!response.ok) {
+        // Handle HTTP errors (e.g., 400, 500)
+        const errorText = await response.text(); // Get error message from server
+        alert(`HTTP error ${response.status}: ${errorText} endpoint:${apiUrl}`);
+        return false;
+      }
+
+      console.log('Note saved successfully');
+      // Optionally, update the UI or show a success message
+    } catch (error) {
+      console.error('Error saving note:', error);
+      alert("Error saving note:" + error);
+      return false;
+      // Handle network errors or other exceptions
+    }
+
+    return true;
   };
 
   const handleSelectText = (index: number) => {

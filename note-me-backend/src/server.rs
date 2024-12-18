@@ -1,5 +1,8 @@
 use axum::{routing::put, routing::get, response::IntoResponse, Router, Json};
+use http::Method;
+use http::header::{CONTENT_TYPE};
 use std::sync::{Arc, Mutex};
+use tower_http::cors::{CorsLayer, Any};
 
 use crate::note::Note;
 
@@ -13,6 +16,14 @@ impl Server {
     }
 
     pub async fn serve(self, ip: &str, port: i32) {
+        let cors = CorsLayer::new()
+        // allow `GET`, `POST`, and `PUT` when accessing the resource
+        .allow_methods([Method::GET, Method::POST, Method::PUT])
+        // allow requests from any origin
+        .allow_origin(Any) // Only allow requests from your React app
+        //.allow_origin(Origin::any()) // NOT RECOMMENDED FOR PRODUCTION
+        .allow_headers([CONTENT_TYPE]);
+
         let server = Arc::new(Mutex::new(self));
 
         let app = Router::new()
@@ -29,7 +40,8 @@ impl Server {
                 let server = Arc::clone(&server);
                 move || Self::get_notes(server)
             },)
-        );
+        )
+        .layer(cors);
 
         let address = format!("{}:{}", ip, port);
         let listener = tokio::net::TcpListener::bind(&address)
@@ -51,7 +63,7 @@ impl Server {
         let mut server = server.lock().unwrap();
         println!(
             "Received note: title={}, text={}, date={}",
-            note.title, note.text, note.date
+            note.title, note.text, note.created_at
         );
 
         // Update the notes in the server

@@ -1,7 +1,7 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     dir: 'note-me-backend'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/note-me-backend:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/note-me-backend:$COMMIT_SHA', '--context', '.']
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/note-me-backend:$COMMIT_SHA']
   # Deploy to Cloud Run, GKE, etc.

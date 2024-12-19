@@ -1,7 +1,7 @@
 # Stage 1: Build the Rust binary
 FROM rust:1.74-slim-bullseye AS builder
 WORKDIR /app
-COPY note-me-backend ./
+COPY Cargo.toml Cargo.lock ./
 RUN cargo fetch
 COPY src ./src
 RUN cargo build --release

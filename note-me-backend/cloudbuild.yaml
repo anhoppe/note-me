@@ -21,4 +21,4 @@ steps:
       ]
 images:
 - gcr.io/$PROJECT_ID/my-rust-backend:$COMMIT_SHA
-logsBucket: 'gs://note-me-backend_cloudbuild'
+logsBucket: 'gs://991989948061_cloudbuild'

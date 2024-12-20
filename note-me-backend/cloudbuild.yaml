@@ -20,6 +20,7 @@ steps:
         '--platform',
         'managed',
         '--allow-unauthenticated', # Remove in production
+        '--service-account', 'note-me-build-sa@$PROJECT_ID.iam.gserviceaccount.com' # Explicitly set the service account      
       ]
 images:
 - gcr.io/$PROJECT_ID/note-me-backend:$COMMIT_SHA

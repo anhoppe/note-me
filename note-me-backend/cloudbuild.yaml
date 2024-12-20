@@ -1,7 +1,7 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker:latest'
+  - name: 'gcr.io/cloud-builders/docker'
     dir: 'note-me-backend'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/note-me-backend:$COMMIT_SHA', '--context', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/note-me-backend:$COMMIT_SHA', '.']
   - name: 'gcr.io/cloud-builders/docker'  # Empty step to invalidate cache
     args: ['--version']
   - name: 'gcr.io/cloud-builders/docker'

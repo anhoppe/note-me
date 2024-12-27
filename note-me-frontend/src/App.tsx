@@ -9,7 +9,7 @@ import NoteForm from './NoteForm';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const apiUrl = "http://127.0.0.1:3000/notes";
+  const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
 
   const handleAddNote = async () => {
     const newNote = new Note();

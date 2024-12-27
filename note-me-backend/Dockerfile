@@ -11,5 +11,5 @@ FROM debian:bullseye-slim
 WORKDIR /app
 COPY --from=builder /app/target/release/note-me-backend /app/note-me-backend
 COPY --from=builder /app/target/release/deps /app/deps
-EXPOSE 3000
+EXPOSE 8080
 CMD ["./note-me-backend"]

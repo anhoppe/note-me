@@ -7,7 +7,7 @@ COPY src ./src
 RUN cargo build --release
 
 # Stage 2: Create the final image
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim AS runtime
 WORKDIR /app
 COPY --from=builder /app/target/release/note-me-backend /app/note-me-backend
 COPY --from=builder /app/target/release/deps /app/deps

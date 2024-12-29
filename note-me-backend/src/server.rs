@@ -1,5 +1,5 @@
 use axum::{extract::Path, routing::put, routing::get, response::IntoResponse, Router, Json};
-use http::Method;
+use http::{Method, StatusCode};
 use http::header::{CONTENT_TYPE};
 use std::sync::{Arc, Mutex};
 use tower_http::cors::{CorsLayer, Any};
@@ -62,8 +62,11 @@ impl Server {
     async fn get_note_by_id(server: Arc<Mutex<Self>>, Path(id): Path<u64>) -> impl IntoResponse {
         let server = server.lock().unwrap();
         let notes = server.notes.clone();
-        let note = notes.iter().find(|note| note.id == id);
-        Json(note);
+        if let Some(note) = notes.iter().find(|note| note.id == id).cloned() {
+            Json(note).into_response()
+        } else {
+            (StatusCode::NOT_FOUND, "Note not found").into_response()
+        }
     }
     
     async fn get_notes(server: Arc<Mutex<Self>>) -> impl IntoResponse {

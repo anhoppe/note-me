@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './App.css'
@@ -11,8 +11,29 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
 
+  useEffect(() => {
+    const getNotes = async () => {
+        try {
+            const data = await fetchNotes();
+            setNotes(data);
+        } catch (err) {
+            // setError((err as Error).message);
+        }
+    };
+
+    getNotes();
+  }, []); // Empty dependency array ensures this runs only once
+
+  const fetchNotes = async (): Promise<Note[]> => {
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+        throw new Error("Failed to fetch notes");
+    }
+    return response.json();
+  };
+
   const handleAddNote = async () => {
-    const newNote = new Note();
+    const newNote = new Note(BigInt(notes.length));
     newNote.text = "foo";
     newNote.title = "bar";
 

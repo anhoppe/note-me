@@ -1,4 +1,4 @@
-use axum::{routing::put, routing::get, response::IntoResponse, Router, Json};
+use axum::{extract::Path, routing::put, routing::get, response::IntoResponse, Router, Json};
 use http::Method;
 use http::header::{CONTENT_TYPE};
 use std::sync::{Arc, Mutex};
@@ -39,7 +39,14 @@ impl Server {
             get({
                 let server = Arc::clone(&server);
                 move || Self::get_notes(server)
-            },)
+            }),
+        )
+        .route(
+            "/notes/:id",
+            get({
+                let server = Arc::clone(&server);
+                move |id| Self::get_note_by_id(server, id)
+            }),
         )
         .layer(cors);
 
@@ -52,11 +59,17 @@ impl Server {
         axum::serve(listener, app).await.unwrap();
     }
 
+    async fn get_note_by_id(server: Arc<Mutex<Self>>, Path(id): Path<u64>) -> impl IntoResponse {
+        let server = server.lock().unwrap();
+        let notes = server.notes.clone();
+        let note = notes.iter().find(|note| note.id == id);
+        Json(note);
+    }
     
     async fn get_notes(server: Arc<Mutex<Self>>) -> impl IntoResponse {
         let server = server.lock().unwrap();
-        let count = server.notes.len();
-        Json(count)
+        let notes = server.notes.clone();
+        Json(notes)
     }
     
     async fn update_note(server: Arc<Mutex<Self>>, Json(note): Json<Note>) -> impl IntoResponse {

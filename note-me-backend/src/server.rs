@@ -30,6 +30,7 @@ impl Server {
         .route(
             "/notes",
             put({
+                println!("put");
                 let server = Arc::clone(&server);
                 move |note| Self::update_note(server, note)
             }),
@@ -37,6 +38,7 @@ impl Server {
         .route(
             "/notes",
             get({
+                println!("get");
                 let server = Arc::clone(&server);
                 move || Self::get_notes(server)
             }),
@@ -44,6 +46,7 @@ impl Server {
         .route(
             "/notes/:id",
             get({
+                println!("get/:id");
                 let server = Arc::clone(&server);
                 move |id| Self::get_note_by_id(server, id)
             }),
@@ -76,10 +79,12 @@ impl Server {
     }
     
     async fn update_note(server: Arc<Mutex<Self>>, Json(note): Json<Note>) -> impl IntoResponse {
+        println!("update_note");
+
         let mut server = server.lock().unwrap();
         println!(
-            "Received note: title={}, text={}, date={}",
-            note.title, note.text, note.created_at
+            "Received note: id={}, title={}, text={}, date={}",
+            note.id, note.title, note.text, note.created_at
         );
 
         // Update the notes in the server

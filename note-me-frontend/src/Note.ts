@@ -11,4 +11,13 @@ export class Note
     this.title = "bar";
     this.createdAt = new Date();
   }
+
+  toJSON() {
+    return {
+      id: this.id.toString(),
+      title: this.title,
+      text: this.text,
+      createdAt: this.createdAt, 
+    }
+  }
 }

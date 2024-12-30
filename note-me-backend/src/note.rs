@@ -1,8 +1,9 @@
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Note {
+    #[serde(deserialize_with = "deserialize_id")]
     pub id: u64,
     pub title: String,
     pub text: String,
@@ -10,3 +11,10 @@ pub struct Note {
     pub created_at: String,
 }    
 
+fn deserialize_id<'de, D>(deserializer: D) -> Result<u64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: String = String::deserialize(deserializer)?; // Directly deserialize as String
+    s.parse::<u64>().map_err(serde::de::Error::custom) // Parse as u64
+}

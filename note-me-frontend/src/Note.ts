@@ -17,7 +17,7 @@ export class Note
       id: this.id.toString(),
       title: this.title,
       text: this.text,
-      createdAt: this.createdAt, 
+      createdAt: this.createdAt.toISOString(), 
     }
   }
 }

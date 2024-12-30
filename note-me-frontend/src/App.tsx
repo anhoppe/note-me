@@ -9,14 +9,19 @@ import NoteForm from './NoteForm';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  // const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
-  const apiUrl = "http://127.0.0.1/notes";
+  const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
+  // const apiUrl = "http://127.0.0.1:8080/notes";
 
   useEffect(() => {
     const getNotes = async () => {
         try {
             const data = await fetchNotes();
-            setNotes(data);
+            
+            const notesData = data.map((note: any) => ({
+              ...note,
+              createdAt: new Date(note.createdAt), // Convert string to Date
+          }));
+            setNotes(notesData);
         } catch (err) {
             // setError((err as Error).message);
         }
@@ -27,9 +32,11 @@ function App() {
 
   const fetchNotes = async (): Promise<Note[]> => {
     const response = await fetch(apiUrl);
+
     if (!response.ok) {
         throw new Error("Failed to fetch notes");
     }
+
     return response.json();
   };
 
@@ -48,12 +55,13 @@ function App() {
 
   const handleSaveNote = async (note: Note): Promise<boolean> => {
     try {
+      const payload = JSON.stringify(note);
       const response = await fetch(apiUrl, {
         method: 'PUT', // Correct method is PUT as specified
         headers: {
           'Content-Type': 'application/json', // Very important!
         },
-        body: JSON.stringify(note), // Convert the note object to JSON
+        body: payload, // Convert the note object to JSON
       });
 
       if (!response.ok) {

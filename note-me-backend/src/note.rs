@@ -1,4 +1,5 @@
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -8,7 +9,7 @@ pub struct Note {
     pub title: String,
     pub text: String,
     #[serde(rename = "createdAt")]
-    pub created_at: String,
+    pub created_at: DateTime<Utc>,
 }    
 
 fn deserialize_id<'de, D>(deserializer: D) -> Result<u64, D::Error>

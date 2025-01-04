@@ -10,18 +10,24 @@ function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
-  // const apiUrl = "http://127.0.0.1:8080/notes";
+  //const apiUrl = "http://127.0.0.1:8080/notes";
 
   useEffect(() => {
     const getNotes = async () => {
         try {
             const data = await fetchNotes();
             
-            const notesData = data.map((note: any) => ({
-              ...note,
-              createdAt: new Date(note.createdAt), // Convert string to Date
-          }));
-            setNotes(notesData);
+            const notesData = data.map(noteData => {
+              const note = new Note(noteData.id)
+
+              note.text = noteData.text;
+              note.title = noteData.title;
+              note.createdAt = new Date(noteData.createdAt); // Convert string to Date
+
+              return note;
+          });
+
+          setNotes(notesData);
         } catch (err) {
             // setError((err as Error).message);
         }
@@ -45,7 +51,7 @@ function App() {
     newNote.text = "foo";
     newNote.title = "bar";
 
-    let success = await handleSaveNote(newNote);
+    let success = await createNote(newNote);
 
     if (success)
     {    
@@ -53,13 +59,13 @@ function App() {
     }  
   };
 
-  const handleSaveNote = async (note: Note): Promise<boolean> => {
+  const createNote = async (note: Note): Promise<boolean> => {
     try {
       const payload = JSON.stringify(note);
       const response = await fetch(apiUrl, {
-        method: 'PUT', // Correct method is PUT as specified
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Very important!
+          'Content-Type': 'application/json',
         },
         body: payload, // Convert the note object to JSON
       });
@@ -83,20 +89,54 @@ function App() {
     return true;
   };
 
+  const updateNote = async (note: Note) => {
+    try {
+      const payload = JSON.stringify(note);
+      const url = apiUrl + '/' + note.id.toString();
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: payload,
+      });
+  
+      if (!response.ok) {
+        // Handle HTTP errors (e.g., 400, 500)
+        const errorText = await response.text(); // Get error message from server
+        alert(`HTTP error ${response.status}: ${errorText} endpoint:${apiUrl}`);
+        return false;
+      }
+  
+      console.log('Note updated successfully');  
+    } catch (error) {
+      console.error('Error updating note:', error);
+      alert("Error updating note:" + error);
+      return false;
+    }
+  }
+
   const handleSelectText = (index: number) => {
     setSelectedIndex(index);
   }
 
-  const handleNoteTextChange = (value: string) => {
+  const changeNoteText = (value: string) => {
     const newNotes = [...notes];
-    newNotes[selectedIndex].text = value;
+    let note = newNotes[selectedIndex];
+    note.text = value;
     setNotes(newNotes);
   };
 
-  const handleNoteTitleChange = (value: string) => {
+  const changeNoteTitle = (value: string) => {
     const newNotes = [...notes];
     newNotes[selectedIndex].title = value;
     setNotes(newNotes);
+  }
+
+  const sendSelectedNoteToBackend = () => {
+    const newNotes = [...notes];
+    let note = newNotes[selectedIndex];
+    updateNote(note);
   }
 
   return (
@@ -118,8 +158,9 @@ function App() {
         <div className="col-md-8">
           <NoteForm 
             note={notes[selectedIndex]} 
-            updateNodeTextFunc={handleNoteTextChange}
-            updateNodeTitleFunc={handleNoteTitleChange}
+            updateNoteTextFunc={changeNoteText}
+            updateNoteTitleFunc={changeNoteTitle}
+            sendNoteToBackend={sendSelectedNoteToBackend}
             />
         </div>
       </div>

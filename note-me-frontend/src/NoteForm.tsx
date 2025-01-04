@@ -3,12 +3,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface NoteProps {
     note: Note;
-    updateNodeTextFunc: (value: string) => void;
-    updateNodeTitleFunc: (value: string) => void;
+    updateNoteTextFunc: (value: string) => void;
+    updateNoteTitleFunc: (value: string) => void;
+    sendNoteToBackend: () => void;
 }
 
 function NoteForm(props: NoteProps) {
-    const {note, updateNodeTextFunc, updateNodeTitleFunc} = props;
+    const {note, updateNoteTextFunc, updateNoteTitleFunc, sendNoteToBackend} = props;
 
     if (!note) {
         return <div>Add or select a note</div>;
@@ -20,13 +21,17 @@ function NoteForm(props: NoteProps) {
                 <textarea 
                     className="form-control"
                     value={note.title} 
-                    onChange={(e) => updateNodeTitleFunc(e.target.value)} />
+                    onChange={(e) => updateNoteTitleFunc(e.target.value)} 
+                    onBlur={sendNoteToBackend}
+                    />
             </div>
             <div className="row-11">
                 <textarea 
                     className="form-control"
                     value={note.text} 
-                    onChange={(e) => updateNodeTextFunc(e.target.value)} />
+                    onChange={(e) => updateNoteTextFunc(e.target.value)} 
+                    onBlur={sendNoteToBackend}
+                    />
             </div>
             <div className="row-1">
                 <textarea

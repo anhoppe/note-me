@@ -1,4 +1,4 @@
-use axum::{extract::Path, routing::put, routing::get, response::IntoResponse, Router, Json};
+use axum::{extract::Path, routing::post, routing::put, routing::get, response::IntoResponse, Router, Json};
 use http::{Method, StatusCode};
 use http::header::{CONTENT_TYPE};
 use std::sync::{Arc, Mutex};
@@ -27,12 +27,25 @@ impl Server {
         let server = Arc::new(Mutex::new(self));
 
         let app = Router::new()
+
         .route(
             "/notes",
+            post({
+                println!("post");
+                let server = Arc::clone(&server);
+                move |note| Self::create_note(server, note)
+            }),
+        )
+        .route(
+            "/notes/:id",
             put({
                 println!("put");
                 let server = Arc::clone(&server);
-                move |note| Self::update_note(server, note)
+                move |id: Path<u64>, note: Json<Note>| Self::update_note_by_id(server, id, note)
+                // move |note| print!("bar")
+                // move |Path(id): Path<u64>, Json(note): Json<Note>| print!("bar")
+                    //Self::update_note_by_id(server, id, note);
+
             }),
         )
         .route(
@@ -71,15 +84,15 @@ impl Server {
             (StatusCode::NOT_FOUND, "Note not found").into_response()
         }
     }
-    
+
     async fn get_notes(server: Arc<Mutex<Self>>) -> impl IntoResponse {
         let server = server.lock().unwrap();
         let notes = server.notes.clone();
         Json(notes)
     }
-    
-    async fn update_note(server: Arc<Mutex<Self>>, Json(note): Json<Note>) -> impl IntoResponse {
-        println!("update_note");
+
+    async fn create_note(server: Arc<Mutex<Self>>, Json(note): Json<Note>) -> impl IntoResponse {
+        println!("create_note");
 
         let mut server = server.lock().unwrap();
         println!(
@@ -89,6 +102,21 @@ impl Server {
 
         // Update the notes in the server
         server.notes.push(note);
+
+        http::StatusCode::OK
+    }
+
+    async fn update_note_by_id(server: Arc<Mutex<Self>>, Path(id): Path<u64>, Json(note): Json<Note>) -> impl IntoResponse {
+        println!("update_note_by_id");
+
+        let mut server = server.lock().unwrap();
+
+        if let Some(n) = server.notes.iter_mut().find(|n| n.id == id) {
+            n.title = note.title;
+            n.text = note.text;
+        } else {
+            return http::StatusCode::NOT_FOUND;
+        }
 
         http::StatusCode::OK
     }

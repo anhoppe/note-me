@@ -12,8 +12,7 @@ createRoot(document.getElementById('root')!).render(
       domain="dev-40fxc54pknc85fku.us.auth0.com"
       clientId="xmcJLDXZCnFO6pS7s9mbJnm0rNbNLVqx"
       authorizationParams={{
-        redirect_uri: "https://note-me-git-main-anhoppes-projects.vercel.app/"
-        // redirect_uri: window.location.origin
+        redirect_uri: window.location.origin,
       }}
     >
       <LoginButton />

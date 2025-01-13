@@ -1,3 +1,4 @@
+import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -9,6 +10,7 @@ import NoteForm from './NoteForm';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const { user, isAuthenticated, isLoading, error } = useAuth0();
   // const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
   const apiUrl = "http://127.0.0.1:8080/notes";
 
@@ -164,17 +166,16 @@ function App() {
             sendNoteToBackend={sendSelectedNoteToBackend}
             />
         </div>
+        {isAuthenticated &&  (
+          <div>
+            <img src={user?.picture} alt={user?.name} />
+            <h2>{user?.name}</h2>
+            <p>{user?.email}</p>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 export default App
-
-          /* Replace with a real rich text editor component */
-          /* <textarea 
-            placeholder="Rich Text Editor" 
-            className="form-control" 
-            value={editedText} 
-            onChange={(e) => handleNoteChange(e.target.value)} />
-        </div> */

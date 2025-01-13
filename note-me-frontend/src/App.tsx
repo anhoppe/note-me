@@ -9,12 +9,13 @@ import NoteForm from './NoteForm';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
-  //const apiUrl = "http://127.0.0.1:8080/notes";
+  // const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
+  const apiUrl = "http://127.0.0.1:8080/notes";
 
   useEffect(() => {
     const getNotes = async () => {
-        try {
+
+      try {
             const data = await fetchNotes();
             
             const notesData = data.map(noteData => {

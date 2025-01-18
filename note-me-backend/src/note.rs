@@ -6,8 +6,14 @@ use serde::{Deserialize, Deserializer, Serialize};
 pub struct Note {
     #[serde(deserialize_with = "deserialize_id")]
     pub id: u64,
+    
+    #[serde(rename = "userId")]
+    pub user_id: String,
+    
     pub title: String,
+    
     pub text: String,
+    
     #[serde(rename = "createdAt")]
     pub created_at: DateTime<Utc>,
 }    

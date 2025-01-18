@@ -1,13 +1,21 @@
-use axum::{extract::Path, routing::post, routing::put, routing::get, response::IntoResponse, Router, Json};
+use axum::{extract::Path, extract::Query, routing::post, routing::put, routing::get, response::IntoResponse, Router, Json};
 use http::{Method, StatusCode};
 use http::header::{CONTENT_TYPE};
+use serde::Deserialize;
 use std::sync::{Arc, Mutex};
 use tower_http::cors::{CorsLayer, Any};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing::info;
 
 use crate::note::Note;
 
 pub struct Server {
     notes: Vec<Note>,
+}
+
+#[derive(Deserialize)]
+struct UserId {
+    user_id: String,
 }
 
 impl Server {
@@ -16,6 +24,16 @@ impl Server {
     }
 
     pub async fn serve(self, ip: &str, port: i32) {
+        tracing_subscriber::registry()
+        .with(
+            EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "example_tracing=debug,tower_http=debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+        info!("Starting server..."); // Now you can use tracing macros
+
         let cors = CorsLayer::new()
         // allow `GET`, `POST`, and `PUT` when accessing the resource
         .allow_methods([Method::GET, Method::POST, Method::PUT])
@@ -42,18 +60,14 @@ impl Server {
                 println!("put");
                 let server = Arc::clone(&server);
                 move |id: Path<u64>, note: Json<Note>| Self::update_note_by_id(server, id, note)
-                // move |note| print!("bar")
-                // move |Path(id): Path<u64>, Json(note): Json<Note>| print!("bar")
-                    //Self::update_note_by_id(server, id, note);
 
             }),
         )
         .route(
             "/notes",
             get({
-                println!("get");
                 let server = Arc::clone(&server);
-                move || Self::get_notes(server)
+                move |user_id: Query<UserId>| Self::get_notes(server, user_id)
             }),
         )
         .route(
@@ -85,9 +99,29 @@ impl Server {
         }
     }
 
-    async fn get_notes(server: Arc<Mutex<Self>>) -> impl IntoResponse {
+    async fn get_notes(server: Arc<Mutex<Self>>, Query(user_id): Query<UserId>) -> impl IntoResponse {
         let server = server.lock().unwrap();
-        let notes = server.notes.clone();
+
+        println!("All notes:");
+        for note in server.notes.iter()  {
+            println!("{}: {}", note.user_id, note.title);
+        }
+
+        let notes: Vec<Note> = server.notes.clone()
+        .into_iter()
+        .filter(|note| note.user_id == user_id.user_id)
+        .collect();
+
+        println!("Filtered by user:");
+        for note in notes.iter()  {
+            println!("{}", note.title);
+        }
+        
+        println!(
+            "Num notes for user {}: {}",
+            user_id.user_id,
+            notes.len()
+        );
         Json(notes)
     }
 
@@ -111,7 +145,7 @@ impl Server {
 
         let mut server = server.lock().unwrap();
 
-        if let Some(n) = server.notes.iter_mut().find(|n| n.id == id) {
+        if let Some(n) = server.notes.iter_mut().find(|n| n.id == id && n.user_id == note.user_id) {
             n.title = note.title;
             n.text = note.text;
         } else {

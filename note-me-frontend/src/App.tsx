@@ -10,12 +10,15 @@ import NoteForm from './NoteForm';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const { user, isAuthenticated, isLoading, error } = useAuth0();
+  const { user, isAuthenticated, logout, isLoading, error } = useAuth0();
   // const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
   const apiUrl = "http://127.0.0.1:8080/notes";
 
   useEffect(() => {
-    const getNotes = async () => {
+
+    if (isAuthenticated && user)
+    {    
+      const getNotes = async () => {
 
       try {
             const data = await fetchNotes();
@@ -34,13 +37,15 @@ function App() {
         } catch (err) {
             // setError((err as Error).message);
         }
+      }    
+      getNotes();
     };
-
-    getNotes();
-  }, []); // Empty dependency array ensures this runs only once
+  }, [isAuthenticated, user]); // Empty dependency array ensures this runs only once
 
   const fetchNotes = async (): Promise<Note[]> => {
-    const response = await fetch(apiUrl);
+    const userId = user?.sub ?? "";
+    const url = `${apiUrl}?user_id=${userId}`;
+    const response = await fetch(url);
 
     if (!response.ok) {
         throw new Error("Failed to fetch notes");
@@ -53,6 +58,7 @@ function App() {
     const newNote = new Note(BigInt(notes.length));
     newNote.text = "foo";
     newNote.title = "bar";
+    newNote.userId = user?.sub ?? "";
 
     let success = await createNote(newNote);
 
@@ -168,9 +174,11 @@ function App() {
         </div>
         {isAuthenticated &&  (
           <div>
-            <img src={user?.picture} alt={user?.name} />
             <h2>{user?.name}</h2>
             <p>{user?.email}</p>
+            <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+              Log Out
+            </button>
           </div>
         )}
       </div>

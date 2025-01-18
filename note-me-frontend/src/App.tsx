@@ -11,8 +11,8 @@ function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const { user, isAuthenticated, logout, isLoading, error } = useAuth0();
-  // const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
-  const apiUrl = "http://127.0.0.1:8080/notes";
+  const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
+  //const apiUrl = "http://127.0.0.1:8080/notes";
 
   useEffect(() => {
 

@@ -11,8 +11,11 @@ function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const { user, isAuthenticated, logout, isLoading, error } = useAuth0();
-  const apiUrl = "https://note-me-backend-991989948061.us-central1.run.app/notes";
-  //const apiUrl = "http://127.0.0.1:8080/notes";
+
+  //import.meta.env.REACT_APP_NOTE_ME_BACKEND_URL;
+  //const apiUrl =  "https://note-me-backend-991989948061.us-central1.run.app/notes";
+  
+  const apiUrl = "http://127.0.0.1:8080/notes";
 
   useEffect(() => {
 
@@ -29,7 +32,7 @@ function App() {
               note.text = noteData.text;
               note.title = noteData.title;
               note.createdAt = new Date(noteData.createdAt); // Convert string to Date
-
+              note.userId = noteData.userId;
               return note;
           });
 
